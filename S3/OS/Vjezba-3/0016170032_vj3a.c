@@ -1,4 +1,5 @@
 #include <stdio.h>
+<<<<<<< HEAD
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -107,5 +108,10 @@ int main(int argc, char *argv[]) {
 
     brisi();
 
+=======
+
+int main() {
+    printf("Vjezba A\n");
+>>>>>>> 6156292f511f8cdc77bddddae43657bf35df3f91
     return 0;
 }

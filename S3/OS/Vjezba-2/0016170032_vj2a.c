@@ -1,3 +1,5 @@
+#include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ipc.h>
@@ -6,8 +8,24 @@
 #include <unistd.h>
 #include <wait.h>
 
+<<<<<<< HEAD
 void odredi_sumu(int p, int broj_procesa, int broj_elemenata,
                  int velicina_dijela, int glavno_polje[]) {
+=======
+// globalne varijable
+int *glavno_polje;
+int shmid;
+
+void brisi(int sig) {
+    shmdt((void *)glavno_polje);
+    if (shmctl(shmid, IPC_RMID, NULL) != -1)
+        printf("\nIzbrisan zajednicki prostor...\n");
+    printf("Izlazim iz programa...\n\n");
+    exit(0);
+}
+
+void odredi_sumu(int p, int broj_procesa, int broj_elemenata, int velicina_dijela, int glavno_polje[]) {
+>>>>>>> 6156292f511f8cdc77bddddae43657bf35df3f91
     // odredi pocetak i kraj segmenta
     int pocetak = p * velicina_dijela;
 int kraj = pocetak + velicina_dijela - 1;
@@ -30,17 +48,15 @@ int izracunaj_broj_procesa(int broj_elementa, int velicina_dijela) {
         return (abs(broj_elementa / velicina_dijela) + 1);
 }
 
-int main() {
-    // odredi broj elemenata i velicinu logickih dijelova
-    int broj_elemenata = 10001, velicina_dijela;
-    while (broj_elemenata > 10000) {
-        printf("\nUnesite broj elemenata polja i velicinu dijelova polja: ");
-        scanf("%d %d", &broj_elemenata, &velicina_dijela);
-    }
+int main(int argc, char *argv[]) {
+    // odredi broj elementa i velicinu logickog dijela
+    int broj_elemenata = atoi(argv[1]);
+    int velicina_dijela = atoi(argv[2]);
+
+    // zadaj id zajednickog prostora
+    shmid = shmget(IPC_PRIVATE, sizeof(int) * broj_elemenata, 0600);
 
     // stvori polje i spremi ga u zajednicku memoriju
-    int *glavno_polje;
-    int shmid = shmget(IPC_PRIVATE, sizeof(int) * broj_elemenata, 0600);
     if (shmid == -1) {
         printf("ERROR: nema zajednicke memorije\n");
         exit(1);
@@ -61,15 +77,24 @@ int main() {
     int broj_procesa = izracunaj_broj_procesa(broj_elemenata, velicina_dijela);
     printf("\nBroj procesa: %d\n\n", broj_procesa);
 
+    // signal handler za brisanje zajednicke memorije
+    struct sigaction sigac = {};
+    sigac.sa_handler = brisi;
+    sigaction(SIGINT, &sigac, NULL);
+
     // pokreni procese
     for (int p = 0; p < broj_procesa; p++) {
         pid_t pid = fork();
 
         // obradi dijete proces
         if (pid == 0) {
+<<<<<<< HEAD
             odredi_sumu(p, broj_procesa, broj_elemenata, velicina_dijela,
                         glavno_polje);
             shmdt((void *)glavno_polje);
+=======
+            odredi_sumu(p, broj_procesa, broj_elemenata, velicina_dijela, glavno_polje);
+>>>>>>> 6156292f511f8cdc77bddddae43657bf35df3f91
             exit(0);
         }
     }
@@ -78,8 +103,7 @@ int main() {
     for (int i = 0; i < broj_procesa; i++)
         wait(NULL);
 
-    shmdt((void *)glavno_polje);
-    shmctl(shmid, IPC_RMID, NULL);
+    brisi(0);
 
     return 0;
 }
