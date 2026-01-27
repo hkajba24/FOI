@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <pthread.h>
+#include <signal.h>
 
 #define LINUX 0
 #define MICROSOFT 1
@@ -105,17 +106,32 @@ void *programer(void *arg) {
 
     srand(time(NULL) * vrsta);
 
-    usleep(rand() % 100);
+    usleep(rand() % 10000);
     udi_restoran(vrsta);
-    usleep(rand() % 100);
+    usleep(rand() % 10000);
     izadi_restoran(vrsta);
 
     return NULL;
 }
 
+void brisanje() {
+    pthread_mutex_destroy(&monitor);
+    pthread_cond_destroy(&red_linux);
+    pthread_cond_destroy(&red_microsoft);
+}
+
+void prekidna_rutina(int sig) {
+    brisanje();
+    exit(0);
+}
+
 int main(int argc, char *argv[]) {
     MOGU_UCI = atoi(argv[1]);
     BROJ_PROGRAMERA = atoi(argv[2]);
+
+    struct sigaction sig_act;
+    sig_act.sa_handler = prekidna_rutina;
+    sigaction(SIGINT, &sig_act, NULL);
 
     pthread_mutex_init(&monitor, NULL);
     pthread_cond_init(&red_linux, NULL);
@@ -140,6 +156,8 @@ int main(int argc, char *argv[]) {
     for (int j = 0; j < i; j++) {
         pthread_join(dretve[j], NULL);
     }
+
+    brisanje();
 
     return 0;
 }

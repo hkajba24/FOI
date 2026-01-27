@@ -1,10 +1,14 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 int N;
 int *unosi;
 int broj_doslih = 0;
+
+pthread_t *dretve;
+int * dretvaID;
 
 pthread_mutex_t unos_mutex;
 pthread_mutex_t barijera_mutex;
@@ -45,14 +49,33 @@ void *unos_dretva(void *arg) {
     return NULL;
 }
 
+void brisi(pthread_t *dretve, int *dretvaID) {
+    pthread_mutex_destroy(&barijera_mutex);
+    pthread_mutex_destroy(&unos_mutex);
+    pthread_cond_destroy(&barijera_cond);
+
+    free(unosi);
+    free(dretve);
+    free(dretvaID);
+}
+
+void prekidna_rutina(int sig) {
+    brisi(dretve, dretvaID);
+    exit(0);
+}
+
 int main(int argc, char *argv[]) {
     N = atoi(argv[1]);
     printf("Broj dretava je %d\n\n", N);
 
+    struct sigaction sig_act = {};
+    sig_act.sa_handler = prekidna_rutina;
+    sigaction(SIGINT, &sig_act, NULL);
+
     // alociraj broj dretvi i dinamicko polje za unos
     unosi = malloc(N * sizeof(int*));
-    pthread_t *dretve = malloc(N * sizeof(pthread_t*));
-    int *dretvaID = malloc(N * sizeof(int*));
+    dretve = malloc(N * sizeof(pthread_t*));
+    dretvaID = malloc(N * sizeof(int*));
 
     // inicijalizacija mutexa i conda
     pthread_mutex_init(&barijera_mutex, NULL);
@@ -70,14 +93,7 @@ int main(int argc, char *argv[]) {
         pthread_join(dretve[i], NULL);
     }
 
-    // izbrisi mutexe i oslobodi zauzeti memoriju
-    pthread_mutex_destroy(&barijera_mutex);
-    pthread_mutex_destroy(&unos_mutex);
-    pthread_cond_destroy(&barijera_cond);
-
-    free(unosi);
-    free(dretve);
-    free(dretvaID);
+    brisi(dretve, dretvaID);
 
     return 0;
 }
