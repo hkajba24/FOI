@@ -116,9 +116,13 @@ int main(int argc, char *argv[]) {
     semctl(semID, SEMAFOR_PRAZAN, SETVAL, 0);
 
     // kreiraj procese
-    pid_t proces_potrosac = fork();
-    if (proces_potrosac == 0)
+    pid_t proces_potrosac1 = fork();
+    if (proces_potrosac1 == 0)
         potrosac();
+
+    pid_t proces_potrosac2 = fork();
+    if (proces_potrosac2 == 0)
+        potrosac
 
     for (int i = 0; i < broj_proizvodaca; i++) {
         pid_t proces_proizvodac = fork();
