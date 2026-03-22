@@ -9,9 +9,9 @@ Od prije su mi poznati protokoli čija imena su napisana boldanim slovima.
 ### Pitanje 2.
 U lancu učuharivanja se nalaze protokoli ovim redom:
 
-|Sloj|Protokol|
-|---|
-|5.|DNS|
-|4.|UDP|
-|3.|IPv4|
-|2.|Ethernet|
+| Sloj | Protokol |
+| --- | --- |
+| 5. | DNS |
+| 4. | UDP |
+| 3. | IPv4 |
+| 2. | Ethernet |
