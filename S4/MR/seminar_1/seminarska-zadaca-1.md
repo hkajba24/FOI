@@ -147,3 +147,5 @@ predavanjima.
 
 **Odgovor:**
 
+![HTTP skica](skice/http-skica.png)
+![DNS skica](skice/DNS-skica.png)
